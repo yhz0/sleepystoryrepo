@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}吃得好好，睡得饱饱 - MIDI共享{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 吃得好好，睡得饱饱 - MIDI共享</h1>
+            <nav>
+                <a href="{{ url_for('index') }}">歌曲列表</a>
+                <a href="{{ url_for('upload') }}">上传歌曲</a>
+                <a href="{{ url_for('download_all') }}">下载全部</a>
+            </nav>
+        </header>
+
+        <main>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="message">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <p>© 2024 吃得好好，睡得饱饱乐队 - MIDI文件共享系统</p>
+        </footer>
+    </div>
+
+    <script>
+        function confirmDelete(songName) {
+            return confirm('确定要删除歌曲 "' + songName + '" 吗？此操作无法撤销。');
+        }
+    </script>
+</body>
+</html>

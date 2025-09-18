@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="song-list">
+    <h2>歌曲列表 (共 {{ songs|length }} 首)</h2>
+
+    {% if songs %}
+        <table class="songs-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>歌曲名</th>
+                    <th>艺术家</th>
+                    <th>版本</th>
+                    <th>上传者</th>
+                    <th>上传时间</th>
+                    <th>音轨</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for song in songs %}
+                <tr>
+                    <td>{{ song.face_id }}</td>
+                    <td title="{{ song.notes or '' }}">{{ song.song_name }}</td>
+                    <td>{{ song.artist or '-' }}</td>
+                    <td>{{ song.version or '-' }}</td>
+                    <td>{{ song.uploaded_by }}</td>
+                    <td>{{ song.uploaded_at.strftime('%m-%d %H:%M') if song.uploaded_at else '-' }}</td>
+                    <td>
+                        {% if song.track_names %}
+                            <span title="{{ song.track_names|join(', ') }}">
+                                {{ song.track_names|length }} 个音轨
+                            </span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="actions">
+                        {% if song.midi_filename %}
+                            <a href="{{ url_for('download_file', song_id=song.id, file_type='midi') }}"
+                               class="btn btn-small" title="下载MIDI文件">📥 MIDI</a>
+                        {% endif %}
+                        {% if song.source_filename %}
+                            <a href="{{ url_for('download_file', song_id=song.id, file_type='source') }}"
+                               class="btn btn-small" title="下载源文件">📥 源文件</a>
+                        {% endif %}
+                        {% if song.lyric_filename %}
+                            <a href="{{ url_for('download_file', song_id=song.id, file_type='lyric') }}"
+                               class="btn btn-small" title="下载歌词文件">📥 歌词</a>
+                        {% endif %}
+                        <a href="{{ url_for('edit', song_id=song.id) }}"
+                           class="btn btn-small btn-edit" title="编辑歌曲信息">✏️ 编辑</a>
+                        <a href="{{ url_for('delete', song_id=song.id) }}"
+                           class="btn btn-small btn-delete" title="删除歌曲"
+                           onclick="return confirmDelete('{{ song.song_name }}')">🗑️ 删除</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">
+            <p>还没有上传任何歌曲</p>
+            <a href="{{ url_for('upload') }}" class="btn">立即上传第一首歌曲</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

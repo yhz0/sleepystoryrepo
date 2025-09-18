@@ -1,0 +1,314 @@
+/* Basic reset and typography */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 2em;
+}
+
+nav {
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: background-color 0.3s;
+}
+
+nav a:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* Main content */
+main {
+    flex: 1;
+    margin-bottom: 30px;
+}
+
+/* Messages */
+.messages {
+    margin-bottom: 20px;
+}
+
+.message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+
+.btn-small {
+    padding: 5px 10px;
+    font-size: 12px;
+    margin: 2px;
+}
+
+.btn-edit {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #1e7e34;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+/* Song list */
+.song-list h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.songs-table {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-collapse: collapse;
+}
+
+.songs-table th,
+.songs-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.songs-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #495057;
+}
+
+.songs-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.songs-table tr:last-child td {
+    border-bottom: none;
+}
+
+.actions {
+    white-space: nowrap;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.empty-state p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Upload form */
+.upload-form {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.upload-form h2 {
+    margin-bottom: 25px;
+    color: #333;
+    border-bottom: 3px solid #007bff;
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.required {
+    color: #dc3545;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.file-info {
+    font-size: 12px;
+    color: #666;
+    font-weight: normal;
+}
+
+.current-file {
+    margin-top: 5px;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+}
+
+.file-uploads {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 20px;
+    margin: 20px 0;
+    background-color: #f8f9fa;
+}
+
+.form-actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.form-actions .btn {
+    margin: 0 10px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid #dee2e6;
+    color: #666;
+    margin-top: auto;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+
+    header h1 {
+        font-size: 1.5em;
+    }
+
+    nav a {
+        display: block;
+        margin: 5px 0;
+    }
+
+    .songs-table {
+        font-size: 12px;
+    }
+
+    .songs-table th,
+    .songs-table td {
+        padding: 8px 4px;
+    }
+
+    .actions .btn-small {
+        display: block;
+        margin: 2px 0;
+        text-align: center;
+    }
+
+    .upload-form {
+        padding: 20px;
+    }
+
+    .form-actions .btn {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+    }
+}

@@ -1,13 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify
 import os
 import uuid
-import mido
 import zipfile
 import io
 import hashlib
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from database import init_database, create_song, get_all_songs, get_song_by_id, update_song, delete_song
+from midi_parser import parse_midi_tracks
 
 app = Flask(__name__)
 app.secret_key = 'sleepy-story-midi-sharing-secret-key'
@@ -26,21 +26,6 @@ def allowed_file(filename, file_type):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'lrc'
     return False
 
-def parse_midi_tracks(filepath):
-    try:
-        mid = mido.MidiFile(filepath)
-        track_names = []
-        for i, track in enumerate(mid.tracks[1:], 2):  # Skip first track, start numbering from 2
-            track_name = f"Track {i}"
-            for msg in track:
-                if msg.type == 'track_name' and hasattr(msg, 'name') and msg.name.strip():
-                    track_name = msg.name.strip()
-                    break
-            track_names.append(track_name)
-        return track_names
-    except Exception as e:
-        print(f"Error parsing MIDI file: {e}")
-        return []
 
 def save_uploaded_file(file, file_type):
     if file and file.filename and allowed_file(file.filename, file_type):

@@ -72,7 +72,13 @@
                 </label>
                 <input type="file" id="source_file" name="source_file" accept=".musz">
                 {% if song and song.source_filename %}
-                    <div class="current-file">当前文件: {{ song.source_filename }}</div>
+                    <div class="current-file">
+                        当前文件: {{ song.source_filename }}
+                        <label class="delete-file-checkbox">
+                            <input type="checkbox" name="delete_source_file" value="1">
+                            删除此文件
+                        </label>
+                    </div>
                 {% endif %}
             </div>
 
@@ -83,7 +89,13 @@
                 </label>
                 <input type="file" id="lyric_file" name="lyric_file" accept=".lrc">
                 {% if song and song.lyric_filename %}
-                    <div class="current-file">当前文件: {{ song.lyric_filename }}</div>
+                    <div class="current-file">
+                        当前文件: {{ song.lyric_filename }}
+                        <label class="delete-file-checkbox">
+                            <input type="checkbox" name="delete_lyric_file" value="1">
+                            删除此文件
+                        </label>
+                    </div>
                 {% endif %}
             </div>
         </div>

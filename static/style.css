@@ -166,6 +166,16 @@ main {
 
 .actions {
     white-space: nowrap;
+    text-align: right;
+}
+
+.download-buttons {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.edit-delete-buttons {
+    display: inline-block;
 }
 
 .empty-state {
@@ -244,6 +254,32 @@ main {
     border-radius: 4px;
     font-size: 12px;
     color: #666;
+}
+
+.delete-file-checkbox {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #dc3545;
+    cursor: pointer;
+}
+
+.delete-file-checkbox input[type="checkbox"] {
+    width: auto;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.track-count-hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: help;
+}
+
+.song-with-notes {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: help;
 }
 
 .file-uploads {

@@ -22,7 +22,13 @@
                 {% for song in songs %}
                 <tr>
                     <td>{{ song.face_id }}</td>
-                    <td title="{{ song.notes or '' }}">{{ song.song_name }}</td>
+                    <td>
+                        {% if song.notes %}
+                            <span title="{{ song.notes }}" class="song-with-notes">{{ song.song_name }}</span>
+                        {% else %}
+                            {{ song.song_name }}
+                        {% endif %}
+                    </td>
                     <td>{{ song.artist or '-' }}</td>
                     <td>{{ song.version or '-' }}</td>
                     <td>{{ song.uploaded_by }}</td>
@@ -39,31 +45,35 @@
                     </td>
                     <td>
                         {% if song.track_names %}
-                            <span title="{{ song.track_names|join(', ') }}">
-                                {{ song.track_names|length }} 个音轨
+                            <span title="{{ song.track_names|join(', ') }}" class="track-count-hover">
+                                {{ song.track_names|length }}
                             </span>
                         {% else %}
                             -
                         {% endif %}
                     </td>
                     <td class="actions">
-                        {% if song.midi_filename %}
-                            <a href="{{ url_for('download_file', song_id=song.id, file_type='midi') }}"
-                               class="btn btn-small" title="下载MIDI文件">📥 MIDI</a>
-                        {% endif %}
-                        {% if song.source_filename %}
-                            <a href="{{ url_for('download_file', song_id=song.id, file_type='source') }}"
-                               class="btn btn-small" title="下载源文件">📥 源文件</a>
-                        {% endif %}
-                        {% if song.lyric_filename %}
-                            <a href="{{ url_for('download_file', song_id=song.id, file_type='lyric') }}"
-                               class="btn btn-small" title="下载歌词文件">📥 歌词</a>
-                        {% endif %}
-                        <a href="{{ url_for('edit', song_id=song.id) }}"
-                           class="btn btn-small btn-edit" title="编辑歌曲信息">✏️ 编辑</a>
-                        <a href="{{ url_for('delete', song_id=song.id) }}"
-                           class="btn btn-small btn-delete" title="删除歌曲"
-                           onclick="return confirmDelete('{{ song.song_name }}')">🗑️ 删除</a>
+                        <div class="download-buttons">
+                            {% if song.midi_filename %}
+                                <a href="{{ url_for('download_file', song_id=song.id, file_type='midi') }}"
+                                   class="btn btn-small" title="下载MIDI文件">📥 MIDI</a>
+                            {% endif %}
+                            {% if song.source_filename %}
+                                <a href="{{ url_for('download_file', song_id=song.id, file_type='source') }}"
+                                   class="btn btn-small" title="下载源文件">📥 源文件</a>
+                            {% endif %}
+                            {% if song.lyric_filename %}
+                                <a href="{{ url_for('download_file', song_id=song.id, file_type='lyric') }}"
+                                   class="btn btn-small" title="下载歌词文件">📥 歌词</a>
+                            {% endif %}
+                        </div>
+                        <div class="edit-delete-buttons">
+                            <a href="{{ url_for('edit', song_id=song.id) }}"
+                               class="btn btn-small btn-edit" title="编辑歌曲信息">✏️ 编辑</a>
+                            <a href="{{ url_for('delete', song_id=song.id) }}"
+                               class="btn btn-small btn-delete" title="删除歌曲"
+                               onclick="return confirmDelete('{{ song.song_name }}')">🗑️ 删除</a>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}

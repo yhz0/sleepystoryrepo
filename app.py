@@ -137,6 +137,10 @@ def edit(song_id):
             source_file = request.files.get('source_file')
             lyric_file = request.files.get('lyric_file')
 
+            # Check for deletion requests
+            delete_source = request.form.get('delete_source_file') == '1'
+            delete_lyric = request.form.get('delete_lyric_file') == '1'
+
             midi_filename = None
             track_names = None
 
@@ -154,18 +158,32 @@ def edit(song_id):
                     return render_template('upload.html', song=song)
                 track_names = parse_midi_tracks(midi_filepath)
 
-            # Update source file if provided
+            # Update source file if provided or handle deletion
             source_filename = None
-            if source_file and source_file.filename:
+            if delete_source and song['source_filename']:
+                # Delete existing source file
+                old_path = os.path.join(app.config['UPLOAD_FOLDER'], song['source_filename'])
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+                source_filename = ''  # Set to empty string to clear from database
+            elif source_file and source_file.filename:
+                # Replace with new source file
                 if song['source_filename']:
                     old_path = os.path.join(app.config['UPLOAD_FOLDER'], song['source_filename'])
                     if os.path.exists(old_path):
                         os.remove(old_path)
                 source_filename, _ = save_uploaded_file(source_file, 'source')
 
-            # Update lyric file if provided
+            # Update lyric file if provided or handle deletion
             lyric_filename = None
-            if lyric_file and lyric_file.filename:
+            if delete_lyric and song['lyric_filename']:
+                # Delete existing lyric file
+                old_path = os.path.join(app.config['UPLOAD_FOLDER'], song['lyric_filename'])
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+                lyric_filename = ''  # Set to empty string to clear from database
+            elif lyric_file and lyric_file.filename:
+                # Replace with new lyric file
                 if song['lyric_filename']:
                     old_path = os.path.join(app.config['UPLOAD_FOLDER'], song['lyric_filename'])
                     if os.path.exists(old_path):

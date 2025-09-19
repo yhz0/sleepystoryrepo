@@ -19,14 +19,14 @@
         <div class="form-group">
             <label for="artist">艺术家</label>
             <input type="text" id="artist" name="artist"
-                   value="{{ song.artist if song else '' }}"
+                   value="{{ song.artist if song and song.artist else '' }}"
                    maxlength="200" placeholder="可选，艺术家或原作者">
         </div>
 
         <div class="form-group">
             <label for="version">版本</label>
             <input type="text" id="version" name="version"
-                   value="{{ song.version if song else '' }}"
+                   value="{{ song.version if song and song.version else '' }}"
                    maxlength="50" placeholder="如: 1.0, 2.1.3"
                    pattern="[0-9.]+" title="只能包含数字和点">
         </div>
@@ -44,7 +44,7 @@
         <div class="form-group">
             <label for="notes">备注</label>
             <textarea id="notes" name="notes" rows="3" maxlength="500"
-                      placeholder="可选，任何相关的备注信息">{{ song.notes if song else '' }}</textarea>
+                      placeholder="可选，任何相关的备注信息">{{ song.notes if song and song.notes else '' }}</textarea>
         </div>
 
         <div class="file-uploads">

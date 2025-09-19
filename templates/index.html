@@ -26,7 +26,17 @@
                     <td>{{ song.artist or '-' }}</td>
                     <td>{{ song.version or '-' }}</td>
                     <td>{{ song.uploaded_by }}</td>
-                    <td>{{ song.uploaded_at.strftime('%m-%d %H:%M') if song.uploaded_at else '-' }}</td>
+                    <td>
+                        {% if song.uploaded_at %}
+                            {% if song.uploaded_at is string %}
+                                {{ song.uploaded_at[:16].replace('T', ' ')[-11:] }}
+                            {% else %}
+                                {{ song.uploaded_at.strftime('%m-%d %H:%M') }}
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                     <td>
                         {% if song.track_names %}
                             <span title="{{ song.track_names|join(', ') }}">

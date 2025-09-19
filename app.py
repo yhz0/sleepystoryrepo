@@ -4,6 +4,7 @@ import uuid
 import mido
 import zipfile
 import io
+import hashlib
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from database import init_database, create_song, get_all_songs, get_song_by_id, update_song, delete_song
@@ -29,8 +30,8 @@ def parse_midi_tracks(filepath):
     try:
         mid = mido.MidiFile(filepath)
         track_names = []
-        for i, track in enumerate(mid.tracks):
-            track_name = f"Track {i+1}"
+        for i, track in enumerate(mid.tracks[1:], 2):  # Skip first track, start numbering from 2
+            track_name = f"Track {i}"
             for msg in track:
                 if msg.type == 'track_name' and hasattr(msg, 'name') and msg.name.strip():
                     track_name = msg.name.strip()
@@ -43,9 +44,11 @@ def parse_midi_tracks(filepath):
 
 def save_uploaded_file(file, file_type):
     if file and file.filename and allowed_file(file.filename, file_type):
-        # Generate unique filename
+        # Generate hash-based sanitized filename
         file_extension = file.filename.rsplit('.', 1)[1].lower()
-        unique_filename = f"{uuid.uuid4().hex}.{file_extension}"
+        hash_input = f"{file.filename}_{uuid.uuid4().hex}".encode('utf-8')
+        file_hash = hashlib.md5(hash_input).hexdigest()[:12]
+        unique_filename = f"{file_hash}.{file_extension}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
         file.save(filepath)
         return unique_filename, filepath
@@ -209,6 +212,7 @@ def edit(song_id):
 
     return render_template('upload.html', song=song)
 
+
 @app.route('/delete/<song_id>')
 def delete(song_id):
     song = get_song_by_id(song_id)
@@ -251,14 +255,16 @@ def download_file(song_id, file_type):
     songs = get_all_songs()
     face_id = next((s['face_id'] for s in songs if s['id'] == song_id), 1)
 
-    version_part = f"- v{song['version']}" if song['version'] else ""
+    # Include artist if available
+    artist_part = f" - {song['artist']}" if song['artist'] else ""
+    version_part = f" - v{song['version']}" if song['version'] else ""
 
     if file_type == 'midi':
-        download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{version_part}.mid"
+        download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{artist_part}{version_part}.mid"
     elif file_type == 'source':
-        download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{version_part}.musz"
+        download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{artist_part}{version_part}.musz"
     elif file_type == 'lyric':
-        download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{version_part}.lrc"
+        download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{artist_part}{version_part}.lrc"
 
     return send_file(filepath, as_attachment=True, download_name=download_name)
 
@@ -278,20 +284,21 @@ def download_all():
             face_id = song['face_id']
             role = song['uploaded_by']
             song_name = song['song_name']
-            version_part = f"- v{song['version']}" if song['version'] else ""
+            artist_part = f" - {song['artist']}" if song['artist'] else ""
+            version_part = f" - v{song['version']}" if song['version'] else ""
 
             # Add MIDI file
             if song['midi_filename']:
                 midi_path = os.path.join(app.config['UPLOAD_FOLDER'], song['midi_filename'])
                 if os.path.exists(midi_path):
-                    midi_name = f"{face_id:03d}{role} - {song_name}{version_part}.mid"
+                    midi_name = f"{face_id:03d}{role} - {song_name}{artist_part}{version_part}.mid"
                     zf.write(midi_path, midi_name)
 
             # Add lyric file if exists
             if song['lyric_filename']:
                 lyric_path = os.path.join(app.config['UPLOAD_FOLDER'], song['lyric_filename'])
                 if os.path.exists(lyric_path):
-                    lyric_name = f"{face_id:03d}{role} - {song_name}{version_part}.lrc"
+                    lyric_name = f"{face_id:03d}{role} - {song_name}{artist_part}{version_part}.lrc"
                     zf.write(lyric_path, lyric_name)
 
     memory_file.seek(0)

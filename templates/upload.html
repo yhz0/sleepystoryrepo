@@ -68,9 +68,9 @@
             <div class="form-group">
                 <label for="source_file">
                     源文件 (可选)
-                    <span class="file-info">(*.musz, 最大1MB)</span>
+                    <span class="file-info">(*.mscz, 最大1MB)</span>
                 </label>
-                <input type="file" id="source_file" name="source_file" accept=".musz">
+                <input type="file" id="source_file" name="source_file" accept=".mscz">
                 {% if song and song.source_filename %}
                     <div class="current-file">
                         当前文件: {{ song.source_filename }}

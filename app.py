@@ -24,7 +24,7 @@ def allowed_file(filename, file_type):
     if file_type == 'midi':
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ['mid', 'midi']
     elif file_type == 'source':
-        return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'musz'
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'mscz'
     elif file_type == 'lyric':
         return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'lrc'
     return False
@@ -268,7 +268,7 @@ def download_file(song_id, file_type):
     if file_type == 'midi':
         download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{artist_part}{version_part}.mid"
     elif file_type == 'source':
-        download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{artist_part}{version_part}.musz"
+        download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{artist_part}{version_part}.mscz"
     elif file_type == 'lyric':
         download_name = f"{face_id:03d}{song['uploaded_by']} - {song['song_name']}{artist_part}{version_part}.lrc"
 

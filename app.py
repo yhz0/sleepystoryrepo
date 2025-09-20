@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify
+from flask_httpauth import HTTPBasicAuth
+from dotenv import load_dotenv
 import os
 import uuid
 import zipfile
@@ -12,13 +14,25 @@ from werkzeug.utils import secure_filename
 from database import init_database, create_song, get_all_songs, get_song_by_id, update_song, delete_song
 from midi_parser import parse_midi_tracks
 
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
 app.secret_key = 'sleepy-story-midi-sharing-secret-key'
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024  # 1MB max file size
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
 
+# Initialize HTTP Basic Auth
+auth = HTTPBasicAuth()
+
 # Ensure upload directory exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+@auth.verify_password
+def verify_password(username, password):
+    auth_username = os.getenv('AUTH_USERNAME')
+    auth_password = os.getenv('AUTH_PASSWORD')
+    return username == auth_username and password == auth_password
 
 def allowed_file(filename, file_type):
     if file_type == 'midi':
@@ -43,11 +57,13 @@ def save_uploaded_file(file, file_type):
     return None, None
 
 @app.route('/')
+@auth.login_required
 def index():
     songs = get_all_songs()
     return render_template('index.html', songs=songs)
 
 @app.route('/upload', methods=['GET', 'POST'])
+@auth.login_required
 def upload():
     if request.method == 'POST':
         try:
@@ -111,6 +127,7 @@ def upload():
     return render_template('upload.html')
 
 @app.route('/edit/<song_id>', methods=['GET', 'POST'])
+@auth.login_required
 def edit(song_id):
     song = get_song_by_id(song_id)
     if not song:
@@ -220,6 +237,7 @@ def edit(song_id):
 
 
 @app.route('/delete/<song_id>')
+@auth.login_required
 def delete(song_id):
     song = get_song_by_id(song_id)
     if song:
@@ -234,6 +252,7 @@ def delete(song_id):
     return redirect(url_for('index'))
 
 @app.route('/download/<song_id>/<file_type>')
+@auth.login_required
 def download_file(song_id, file_type):
     song = get_song_by_id(song_id)
     if not song:
@@ -275,6 +294,7 @@ def download_file(song_id, file_type):
     return send_file(filepath, as_attachment=True, download_name=download_name)
 
 @app.route('/download_all')
+@auth.login_required
 def download_all():
     songs = get_all_songs()
 
@@ -321,10 +341,12 @@ def download_all():
     )
 
 @app.route('/backup-restore')
+@auth.login_required
 def backup_restore():
     return render_template('backup_restore.html')
 
 @app.route('/backup')
+@auth.login_required
 def backup():
     try:
         # Create backup ZIP file in memory
@@ -370,6 +392,7 @@ def backup():
         return redirect(url_for('backup_restore'))
 
 @app.route('/restore', methods=['POST'])
+@auth.login_required
 def restore():
     if 'backup_file' not in request.files:
         flash('请选择备份文件')

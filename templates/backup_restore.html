@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}备份和恢复 - 吃得好好，睡得饱饱 - MIDI{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <h2>🔧 数据备份和恢复</h2>
+
+    <div class="backup-restore-container">
+        <!-- Backup Section -->
+        <div class="section">
+            <h3>📦 备份数据</h3>
+            <p>创建包含所有歌曲和文件的完整备份。</p>
+            <form action="{{ url_for('backup') }}" method="get">
+                <button type="submit" class="btn btn-primary">下载备份</button>
+            </form>
+        </div>
+
+        <!-- Restore Section -->
+        <div class="section">
+            <h3>📤 恢复数据</h3>
+            <div class="warning-box">
+                <p><strong>⚠️ 重要警告：</strong></p>
+                <p>恢复操作将<strong>完全删除</strong>当前的所有歌曲和文件，并替换为备份中的数据。此操作无法撤销！</p>
+            </div>
+
+            <form action="{{ url_for('restore') }}" method="post" enctype="multipart/form-data" onsubmit="return confirmRestore()">
+                <div class="form-group">
+                    <label for="backup_file">选择备份文件：</label>
+                    <input type="file" id="backup_file" name="backup_file" accept=".zip" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="confirm_restore" name="confirm_restore" required>
+                        我确认要删除所有现有数据并恢复备份
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-danger">恢复数据</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.backup-restore-container {
+    display: grid;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.warning-box {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.warning-box p {
+    margin: 0.5rem 0;
+}
+
+.form-group {
+    margin: 1rem 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.form-group input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+</style>
+
+<script>
+function confirmRestore() {
+    return confirm('⚠️ 最后确认：您确定要删除所有现有数据并恢复备份吗？此操作无法撤销！');
+}
+</script>
+{% endblock %}

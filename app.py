@@ -4,6 +4,9 @@ import uuid
 import zipfile
 import io
 import hashlib
+import json
+import shutil
+import sqlite3
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from database import init_database, create_song, get_all_songs, get_song_by_id, update_song, delete_song
@@ -316,6 +319,158 @@ def download_all():
         as_attachment=True,
         download_name=zip_filename
     )
+
+@app.route('/backup-restore')
+def backup_restore():
+    return render_template('backup_restore.html')
+
+@app.route('/backup')
+def backup():
+    try:
+        # Create backup ZIP file in memory
+        memory_file = io.BytesIO()
+
+        with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+            # Add database file
+            if os.path.exists('database.db'):
+                zf.write('database.db', 'database.db')
+
+            # Add all files from uploads directory
+            upload_dir = app.config['UPLOAD_FOLDER']
+            if os.path.exists(upload_dir):
+                for filename in os.listdir(upload_dir):
+                    file_path = os.path.join(upload_dir, filename)
+                    if os.path.isfile(file_path) and filename != '.gitkeep':
+                        zf.write(file_path, f"uploads/{filename}")
+
+            # Add backup metadata
+            songs = get_all_songs()
+            backup_info = {
+                "backup_date": datetime.now().isoformat(),
+                "song_count": len(songs),
+                "app_version": "1.0"
+            }
+            zf.writestr("backup_info.json", json.dumps(backup_info, ensure_ascii=False, indent=2))
+
+        memory_file.seek(0)
+
+        # Generate backup filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_filename = f"sleepy_backup_{timestamp}.zip"
+
+        return send_file(
+            memory_file,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=backup_filename
+        )
+
+    except Exception as e:
+        flash(f'备份失败: {str(e)}')
+        return redirect(url_for('backup_restore'))
+
+@app.route('/restore', methods=['POST'])
+def restore():
+    if 'backup_file' not in request.files:
+        flash('请选择备份文件')
+        return redirect(url_for('backup_restore'))
+
+    backup_file = request.files['backup_file']
+
+    if backup_file.filename == '':
+        flash('请选择备份文件')
+        return redirect(url_for('backup_restore'))
+
+    if not request.form.get('confirm_restore'):
+        flash('请确认恢复操作')
+        return redirect(url_for('backup_restore'))
+
+    try:
+        # Save uploaded file temporarily
+        temp_backup_path = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_backup.zip')
+        backup_file.save(temp_backup_path)
+
+        # Validate backup file
+        with zipfile.ZipFile(temp_backup_path, 'r') as zf:
+            file_list = zf.namelist()
+
+            # Check if database.db exists in backup
+            if 'database.db' not in file_list:
+                flash('无效的备份文件：缺少数据库文件')
+                os.remove(temp_backup_path)
+                return redirect(url_for('backup_restore'))
+
+            # Test if database file is valid
+            try:
+                db_data = zf.read('database.db')
+                temp_db_path = 'temp_test.db'
+                with open(temp_db_path, 'wb') as f:
+                    f.write(db_data)
+
+                # Test database connection
+                conn = sqlite3.connect(temp_db_path)
+                conn.execute('SELECT COUNT(*) FROM songs')
+                conn.close()
+                os.remove(temp_db_path)
+
+            except Exception as e:
+                flash(f'无效的备份文件：数据库文件损坏 - {str(e)}')
+                os.remove(temp_backup_path)
+                return redirect(url_for('backup_restore'))
+
+        # Backup current data before restore (safety backup)
+        safety_backup_path = f"safety_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+        if os.path.exists('database.db'):
+            with zipfile.ZipFile(safety_backup_path, 'w', zipfile.ZIP_DEFLATED) as safety_zf:
+                safety_zf.write('database.db', 'database.db')
+                upload_dir = app.config['UPLOAD_FOLDER']
+                if os.path.exists(upload_dir):
+                    for filename in os.listdir(upload_dir):
+                        file_path = os.path.join(upload_dir, filename)
+                        if os.path.isfile(file_path) and filename not in ['temp_backup.zip', '.gitkeep']:
+                            safety_zf.write(file_path, f"uploads/{filename}")
+
+        # Clear existing data
+        if os.path.exists('database.db'):
+            os.remove('database.db')
+
+        # Clear uploads directory (except .gitkeep)
+        upload_dir = app.config['UPLOAD_FOLDER']
+        if os.path.exists(upload_dir):
+            for filename in os.listdir(upload_dir):
+                if filename not in ['temp_backup.zip', '.gitkeep']:
+                    file_path = os.path.join(upload_dir, filename)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+
+        # Extract backup
+        with zipfile.ZipFile(temp_backup_path, 'r') as zf:
+            # Extract database
+            if 'database.db' in zf.namelist():
+                with open('database.db', 'wb') as f:
+                    f.write(zf.read('database.db'))
+
+            # Extract upload files
+            for file_info in zf.filelist:
+                if file_info.filename.startswith('uploads/') and not file_info.is_dir():
+                    filename = os.path.basename(file_info.filename)
+                    if filename:
+                        file_path = os.path.join(upload_dir, filename)
+                        with open(file_path, 'wb') as f:
+                            f.write(zf.read(file_info.filename))
+
+        # Clean up
+        os.remove(temp_backup_path)
+
+        flash(f'数据恢复成功！安全备份已保存为: {safety_backup_path}')
+        return redirect(url_for('index'))
+
+    except Exception as e:
+        flash(f'恢复失败: {str(e)}')
+        # Clean up temp file if it exists
+        if os.path.exists(temp_backup_path):
+            os.remove(temp_backup_path)
+        return redirect(url_for('backup_restore'))
 
 if __name__ == '__main__':
     init_database()
